@@ -1,10 +1,10 @@
 #Хакатон
----
+
 This is a hackathon repo for MEPhI
 
 What's done?
 
--Rooms (buggy but works)
--Passwd (Same and crazy insecure)
--???
--profit!!!
+1.Rooms (buggy but works)
+2.*Passwd (Same and crazy insecure)
+3.???
+4.profit!!!
