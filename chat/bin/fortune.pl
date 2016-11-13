@@ -14,6 +14,8 @@ use Term::ReadKey;
 
 $|=1;
 
+my $time = time;
+
 my @strings_to_show = ();
 
 local $SIG{TERM} = $SIG{INT} = \&stop;
@@ -22,10 +24,6 @@ my ( $term_width, $term_height ) = GetTerminalSize();
 
 my $term = Term::ReadLine->new('Simple perl chat');
 $term->MinLine();
-
-my $login_prompt = "Enter your nick ";
-my $prompt = "Enter your message> ";
-my $pass_prompt = "Enter pass ";
 
 local $SIG{WINCH} = sub {
 	( $term_width, $term_height ) = GetTerminalSize();
@@ -38,7 +36,6 @@ sub stop {
 
 sub init {
     print "\e[1;1H\e[J";
-    print $prompt;
 }
 
 sub redraw {
@@ -55,8 +52,8 @@ sub add_message {
 	redraw;
 }
 
-my $nick = $term->readline($login_prompt);
-my $pass = $term->readline($pass_prompt);
+my $nick = 'fortune';
+my $pass = 'fortunepass';
 
 chomp($nick);
 chomp($pass);
@@ -70,7 +67,6 @@ my $server = Local::Chat::ServerConnection->new(nick => $nick,pass=> $pass, host
 		if ($fd == $term->IN) {
 			my $msg = $term->readline('');
 			print "\e[1;1H\e[2K";
-            print $prompt;
                         stop() unless defined $msg;
 			chomp($msg);
                         return unless length $msg;
@@ -102,19 +98,18 @@ my $server = Local::Chat::ServerConnection->new(nick => $nick,pass=> $pass, host
 	},
 	on_message => sub {
 		my ($srv, $message) = @_;
-		add_message( $message->{from} . ": ". $message->{text} );
+		#add_message( $message->{from} . ": ". $message->{text} );
+        if ($message->{text} eq '!who') {
+            $srv->message({ text => 'fortune', to => $room });
+        }
 	},
-	on_rename => sub {
-		my ($srv, $message) = @_;
-		add_message( "\e[31m" . "Пользователь" . $message->{prev} . " изменил имя на " . $message->{nick} . "\e[0m" );
-	},
-	on_join => sub {
-		my ($srv, $message) = @_;
-		add_message("\e[34m" . ">> Пользователь " . $message->{nick} . " присоединился" . "\e[0m");
-	},
-	on_part => sub {
-		my ($srv, $message) = @_;
-		add_message("\e[34m" . "<< Пользователь " . $message->{nick} . " покинул чат" . "\e[0m");
+	on_idle => sub {
+        my ($srv) = @_;
+		if ($time < time){
+			$time += 60;
+            my $message = `fortune`;
+            $srv->message({ text => $message, to => $room });
+		}
 	},
 	on_names => sub {
 		my ($srv, $message) = @_;

@@ -152,9 +152,9 @@ sub packet {
 		when ("msg") {
 			if (length $data->{text}) {
 				# $self->server->message( $pkt->{data}{to}, $pkt->{data}{text} );
-				$self->on_msg and 
+				$self->on_msg and
 					$self->on_msg->($self, $data);
-				$self->on_message and 
+				$self->on_message and
 					$self->on_message->($self, $pkt->{data}{text}, $pkt->{data}{to});
 			}
 			else {
@@ -170,7 +170,7 @@ sub packet {
 		when ("join") {
 			my $room = $pkt->{data}{on};
 			if(exists $self->server->rooms->{$room}){
-				for (values $self->server->rooms) {
+				for (values %{ $self->server->rooms }) {
 					$_->remove($self);
 				}
 				$self->server->rooms->{$room}->join($self);
